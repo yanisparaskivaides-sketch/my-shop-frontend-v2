@@ -116,19 +116,26 @@
         }
 
         async function checkUser() {
-            // Проверяем, есть ли токен в адресной строке (пришёл от Discord)
             const urlParams = new URLSearchParams(window.location.search);
-            let token = urlParams.get('token');
             
-            if (token) {
-                // Если токен есть, сохраняем его и убираем из адресной строки
-                localStorage.setItem('token', token);
-                window.history.replaceState({}, document.title, FRONTEND_URL);
-            } else {
-                // Если в строке нет, берём из локального хранилища
-                token = localStorage.getItem('token');
+            // ЕСЛИ МЫ НА СТРАНИЦЕ /auth/discord/callback С КОДОМ
+            if (window.location.pathname.includes('/auth/discord/callback') && urlParams.get('code')) {
+                const code = urlParams.get('code');
+                // Прямо сейчас отправляем код на сервер
+                const response = await fetch(`${API_URL}/api/auth/discord/callback?code=${code}`);
+                const data = await response.json();
+                
+                if (data.token) {
+                    localStorage.setItem('token', data.token);
+                    window.location.href = FRONTEND_URL; // Возвращаемся на главную
+                    return;
+                } else {
+                    alert('Ошибка авторизации: ' + data.error);
+                }
             }
 
+            // ОБЫЧНАЯ ПРОВЕРКА ПОЛЬЗОВАТЕЛЯ
+            const token = localStorage.getItem('token');
             if (token) {
                 try {
                     const response = await fetch(`${API_URL}/api/user/me`, {
@@ -159,9 +166,9 @@
         async function showLoginButton() {
             const loginBtn = document.getElementById('loginBtn');
             const DISCORD_CLIENT_ID = '1529148109702041610';
-            // Мы просим Discord отправить токен прямо на главную страницу, минуя callback
-            const redirectUri = FRONTEND_URL;
-            const discordUrl = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=identify`;
+            // Отправляем на /auth/discord/callback (Discord сам сюда вернёт)
+            const redirectUri = `${FRONTEND_URL}/auth/discord/callback`;
+            const discordUrl = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=identify`;
             loginBtn.href = discordUrl;
         }
 
