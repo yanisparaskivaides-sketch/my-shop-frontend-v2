@@ -7,9 +7,13 @@
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f4f4f4; }
         .container { max-width: 1200px; margin: 0 auto; }
-        h1 { text-align: center; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: white; padding: 15px 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .balance { font-size: 20px; font-weight: bold; color: #28a745; }
+        .header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .header-left { display: flex; align-items: center; gap: 10px; }
+        .header-left h1 { margin: 0; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; }
+        .login-btn { background: #5865F2; color: white; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; display: inline-block; }
+        .login-btn:hover { background: #4752C4; }
+        .balance { font-weight: bold; color: #28a745; }
         .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
         .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }
         .card img { max-width: 100%; height: 150px; object-fit: contain; }
@@ -17,68 +21,121 @@
         .btn { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; width: 100%; margin-top: 10px; }
         .btn:hover { background: #0056b3; }
         #status { text-align: center; margin-bottom: 20px; font-size: 18px; color: #555; }
+        .auth-box { text-align: center; margin-top: 50px; font-size: 18px; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🛍️ Наш магазин</h1>
-            <div class="balance" id="balanceDisplay">💰 Баланс: Загрузка...</div>
+            <div class="header-left">
+                <h1>🛍️ Наш магазин</h1>
+                <div id="userInfo"></div>
+            </div>
+            <div id="loginBlock">
+                <a href="#" class="login-btn" id="loginBtn">🔵 Войти через Discord</a>
+            </div>
         </div>
-        
+
         <div id="status">Загрузка товаров...</div>
         <div class="products" id="productList"></div>
     </div>
 
     <script>
-        // Ссылка на твой сервер (она правильная!)
         const API_URL = 'https://my-shop-server-e0hc.onrender.com';
+        const FRONTEND_URL = 'https://my-shop-frontend-hc6m.onrender.com';
 
-        // ВАЖНО: ВСТАВЬ СЮДА СВОЙ EMAIL (тот, под которым ты заходишь в админку)
-        const USER_EMAIL = 'test@mail.com';
+        // Проверяем, есть ли токен в ссылке (после входа через Discord)
+        const urlParams = new URLSearchParams(window.location.search);
+        let token = urlParams.get('token');
+        let initialBalance = urlParams.get('balance');
+
+        let currentUser = null;
 
         async function loadProducts() {
-            try {
-                const response = await fetch(`${API_URL}/api/products`);
-                const products = await response.json();
-                
-                document.getElementById('status').innerText = products.length > 0 ? '' : 'Товаров пока нет';
-                
-                const list = document.getElementById('productList');
-                list.innerHTML = '';
-                
-                products.forEach(p => {
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    card.innerHTML = `
-                        <h3>${p.name}</h3>
-                        <div class="price">${p.price} ₽</div>
-                        ${p.image_url ? `<img src="${p.image_url}">` : ''}
-                        <p>${p.description || ''}</p>
-                        <button class="btn" onclick="alert('Добавлено в корзину: ${p.name}')">Купить</button>
-                    `;
-                    list.appendChild(card);
-                });
-            } catch (error) {
-                document.getElementById('status').innerText = 'Ошибка загрузки: ' + error.message;
+            const response = await fetch(`${API_URL}/api/products`);
+            const products = await response.json();
+            
+            document.getElementById('status').innerText = products.length > 0 ? '' : 'Товаров пока нет';
+            
+            const list = document.getElementById('productList');
+            list.innerHTML = '';
+            
+            products.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <h3>${p.name}</h3>
+                    <div class="price">${p.price} ₽</div>
+                    ${p.image_url ? `<img src="${p.image_url}">` : ''}
+                    <p>${p.description || ''}</p>
+                    <button class="btn" onclick="buyProduct(${p.id}, '${p.name}', ${p.price})">Купить</button>
+                `;
+                list.appendChild(card);
+            });
+        }
+
+        async function buyProduct(id, name, price) {
+            if (!currentUser) return alert('Сначала войдите через Discord!');
+            if (currentUser.balance < price) return alert(`Не хватает монет! У вас ${currentUser.balance}, нужно ${price}.`);
+            
+            if (confirm(`Купить "${name}" за ${price} монет?`)) {
+                // Здесь будет списание монет (добавим в следующем шаге)
+                alert('✅ Покупка совершена! (Монеты списаны)');
+                location.reload();
             }
         }
 
-        // Функция для показа баланса
-        async function showBalance() {
-            try {
-                const response = await fetch(`${API_URL}/api/user/balance/${USER_EMAIL}`);
-                const data = await response.json();
-                document.getElementById('balanceDisplay').innerText = `💰 Баланс: ${data.balance} монет`;
-            } catch (error) {
-                document.getElementById('balanceDisplay').innerText = '💰 Баланс: Не удалось загрузить';
-                console.log('Ошибка баланса:', error);
+        // Логика входа и проверки пользователя
+        async function checkUser() {
+            if (token) {
+                // Сохраняем токен в браузер
+                localStorage.setItem('token', token);
+                window.history.replaceState({}, document.title, FRONTEND_URL);
+            } else {
+                token = localStorage.getItem('token');
             }
+
+            if (token) {
+                try {
+                    const response = await fetch(`${API_URL}/api/user/me`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (response.ok) {
+                        currentUser = await response.json();
+                        renderUser(currentUser);
+                        return;
+                    }
+                } catch (e) {}
+                localStorage.removeItem('token');
+            }
+
+            // Если не вошли - показываем кнопку входа
+            showLoginButton();
         }
 
-        // Запускаем всё при загрузке
-        loadProducts();
-        showBalance();
+        function renderUser(user) {
+            const loginBlock = document.getElementById('loginBlock');
+            const userInfo = document.getElementById('userInfo');
+            
+            loginBlock.innerHTML = `<div class="balance">💰 Баланс: ${user.balance} монет</div>`;
+            userInfo.innerHTML = `
+                ${user.avatar_url ? `<img src="${user.avatar_url}" class="avatar">` : ''}
+                <strong>${user.name}</strong>
+            `;
+            document.getElementById('userInfo').style.display = 'flex';
+        }
+
+        async function showLoginButton() {
+            const loginBtn = document.getElementById('loginBtn');
+            const response = await fetch(`${API_URL}/api/auth/discord`);
+            const data = await response.json();
+            loginBtn.href = data.url;
+        }
+
+        window.onload = () => {
+            loadProducts();
+            checkUser();
+        };
     </script>
 </body>
 </html>
