@@ -98,9 +98,29 @@
             alert('✅ Покупка совершена!');
         }
 
+        // УНИВЕРСАЛЬНАЯ ФУНКЦИЯ АВТОРИЗАЦИИ
         async function handleAuth() {
-            const token = localStorage.getItem('token');
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
 
+            // Если Discord вернул нас на главную с параметром code
+            if (code) {
+                const response = await fetch(`${API_URL}/api/auth/discord/callback?code=${code}`);
+                const data = await response.json();
+                
+                if (data.token) {
+                    localStorage.setItem('token', data.token);
+                    // Очищаем ссылку от параметров и перезагружаемся
+                    window.history.replaceState({}, document.title, FRONTEND_URL);
+                    window.location.reload();
+                    return;
+                } else {
+                    alert('Ошибка авторизации: ' + (data.error || 'Неизвестная ошибка'));
+                }
+            }
+
+            // Проверяем токен в LocalStorage
+            const token = localStorage.getItem('token');
             if (token) {
                 try {
                     const response = await fetch(`${API_URL}/api/user/me`, {
@@ -114,6 +134,7 @@
                 } catch (e) {}
                 localStorage.removeItem('token');
             }
+
             showLoginButton();
         }
 
@@ -130,9 +151,8 @@
         async function showLoginButton() {
             const loginBtn = document.getElementById('loginBtn');
             const DISCORD_CLIENT_ID = '1529148109702041610';
-            // ВАЖНО: Теперь ссылка ведёт на файл callback.html!
-            const redirectUri = `${FRONTEND_URL}/callback.html`;
-            const discordUrl = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=identify`;
+            // ВАЖНО: Отправляем Discord прямо на главную страницу, без сложных путей
+            const discordUrl = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(FRONTEND_URL)}&response_type=code&scope=identify`;
             loginBtn.onclick = () => { window.location.href = discordUrl; };
         }
 
