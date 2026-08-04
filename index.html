@@ -116,7 +116,18 @@
         }
 
         async function checkUser() {
-            const token = localStorage.getItem('token');
+            // Проверяем, есть ли токен в адресной строке (пришёл от Discord)
+            const urlParams = new URLSearchParams(window.location.search);
+            let token = urlParams.get('token');
+            
+            if (token) {
+                // Если токен есть, сохраняем его и убираем из адресной строки
+                localStorage.setItem('token', token);
+                window.history.replaceState({}, document.title, FRONTEND_URL);
+            } else {
+                // Если в строке нет, берём из локального хранилища
+                token = localStorage.getItem('token');
+            }
 
             if (token) {
                 try {
@@ -148,28 +159,15 @@
         async function showLoginButton() {
             const loginBtn = document.getElementById('loginBtn');
             const DISCORD_CLIENT_ID = '1529148109702041610';
-            const redirectUri = `${FRONTEND_URL}/auth/discord/callback`;
-            const discordUrl = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=identify`;
+            // Мы просим Discord отправить токен прямо на главную страницу, минуя callback
+            const redirectUri = FRONTEND_URL;
+            const discordUrl = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=identify`;
             loginBtn.href = discordUrl;
         }
 
-        // === ЭТОТ КОД ПЕРЕХВАТЫВАЕТ АВТОРИЗАЦИЮ ===
         window.onload = () => {
-            // Проверяем, вернулись ли мы от Discord
-            const urlParams = new URLSearchParams(window.location.search);
-            const code = urlParams.get('code');
-            const error = urlParams.get('error');
-
-            if (code) {
-                // Если есть код, перенаправляем на сервер для обработки
-                window.location.href = `https://my-shop-server-e0hc.onrender.com/api/auth/discord/callback?code=${code}`;
-            } else if (error) {
-                alert('❌ Ошибка авторизации в Discord');
-            } else {
-                // Если мы на главной странице, загружаем магазин
-                loadProducts();
-                checkUser();
-            }
+            loadProducts();
+            checkUser();
         };
     </script>
 </body>
