@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <title>Авторизация...</title>
@@ -8,7 +8,7 @@
     </style>
 </head>
 <body>
-    <h2>🔄 Загрузка вашего профиля...</h2>
+    <h2>⏳ Вход в Галактику...</h2>
 
     <script>
         (async function() {
@@ -16,7 +16,7 @@
             const code = params.get('code');
 
             if (!code) {
-                document.body.innerHTML = '<h2 style="color:red;">❌ Ошибка: Код авторизации не найден</h2>';
+                document.body.innerHTML = '<h2 style="color:red;">❌ Код авторизации не найден</h2>';
                 return;
             }
 
@@ -26,15 +26,14 @@
                 const data = await response.json();
 
                 if (data.token) {
-                    // Сохраняем токен в браузере
                     localStorage.setItem('token', data.token);
-                    // Перекидываем на главную страницу (где уже будет профиль)
+                    // Перенаправляем на главную страницу
                     window.location.href = '/';
                 } else {
-                    document.body.innerHTML = `<h2 style="color:red;">❌ Ошибка: ${data.error || 'Неизвестная ошибка'}</h2>`;
+                    document.body.innerHTML = `<h2 style="color:red;">❌ Ошибка сервера: ${data.error || 'Неизвестно'}</h2>`;
                 }
             } catch (error) {
-                document.body.innerHTML = '<h2 style="color:red;">❌ Ошибка подключения к серверу</h2>';
+                document.body.innerHTML = '<h2 style="color:red;">❌ Ошибка соединения с сервером</h2>';
             }
         })();
     </script>
