@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ-панель</title>
+    <style>
+        body { font-family: Arial, padding: 20px; background: #eee; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; }
+        input, textarea { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; }
+        button { background: #28a745; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 5px; }
+        button.del { background: #dc3545; }
+        .item { border-bottom: 1px solid #ddd; padding: 10px 0; display: flex; justify-content: space-between; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🛠️ Админ-панель</h2>
+        <h3>Добавить товар</h3>
+        <input type="text" id="name" placeholder="Название">
+        <input type="number" id="price" placeholder="Цена (только цифры)">
+        <input type="text" id="image" placeholder="Ссылка на картинку (необязательно)">
+        <textarea id="desc" placeholder="Описание"></textarea>
+        <button onclick="addProduct()">Добавить товар</button>
+
+        <h3>Список товаров</h3>
+        <div id="list"></div>
+    </div>
+
+    <script>
+        // Ссылка на ваш сервер
+        const API_URL = 'https://my-shop-server-e0hc.onrender.com';
+
+        async function load() {
+            const res = await fetch(`${API_URL}/api/products`);
+            const items = await res.json();
+            const div = document.getElementById('list');
+            div.innerHTML = items.map(p => `
+                <div class="item">
+                    <span><b>${p.name}</b> - ${p.price}₽</span>
+                    <button class="del" onclick="delProduct(${p.id})">Удалить</button>
+                </div>
+            `).join('');
+        }
+        load();
+
+        async function addProduct() {
+            const name = document.getElementById('name').value;
+            const price = document.getElementById('price').value;
+            const image = document.getElementById('image').value;
+            const desc = document.getElementById('desc').value;
+            if(!name || !price) return alert('Введите название и цену!');
+
+            await fetch(`${API_URL}/api/admin/products`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, price: Number(price), image_url: image, description: desc })
+            });
+            load();
+            document.getElementById('name').value = '';
+            document.getElementById('price').value = '';
+        }
+
+        async function delProduct(id) {
+            if(confirm('Удалить товар?')) {
+                await fetch(`${API_URL}/api/admin/products/${id}`, { method: 'DELETE' });
+                load();
+            }
+        }
+    </script>
+</body>
+</html>
