@@ -3,29 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌌 Галактический магазин</title>
+    <title>Магазин</title>
     <style>
-        body { background: #0a0a1a; color: #e0e0ff; font-family: sans-serif; padding: 20px; }
+        body { font-family: Arial; background: #f4f4f4; padding: 20px; }
         .container { max-width: 1200px; margin: 0 auto; }
-        h1 { text-align: center; font-size: 32px; margin-bottom: 30px; background: linear-gradient(135deg, #b388ff, #00e5ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; }
-        .card { background: rgba(15, 15, 35, 0.8); border: 1px solid rgba(150, 0, 255, 0.3); padding: 20px; border-radius: 20px; text-align: center; }
-        .price { color: #00e5ff; font-size: 22px; font-weight: bold; }
-        .btn { background: transparent; color: #b388ff; border: 2px solid #b388ff; padding: 10px 20px; border-radius: 30px; cursor: pointer; }
-        .btn:hover { background: #b388ff; color: #0a0a1a; }
+        h1 { text-align: center; }
+        .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+        .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }
+        .price { font-size: 20px; color: green; font-weight: bold; }
+        .btn { background: #007bff; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; width: 100%; margin-top: 10px; }
+        .btn:hover { background: #0056b3; }
+        
+        /* Профиль */
+        .profile-box { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 30px; display: none; }
+        .profile-box h2 { margin-top: 0; color: #333; }
+        .purchase-item { border-bottom: 1px solid #eee; padding: 10px 0; display: flex; justify-content: space-between; }
+        .purchase-item:last-child { border-bottom: none; }
+        .user-badge { font-weight: bold; color: #007bff; }
+        #status { text-align: center; margin-bottom: 20px; color: #555; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🌌 ГАЛАКТИКА</h1>
-        <div id="status" style="text-align:center; margin-bottom:20px; color:#888;">Загрузка товаров...</div>
+        <h1>🛍️ Магазин</h1>
+        
+        <div id="status">Загрузка товаров...</div>
+        
+        <div class="profile-box" id="profileBox">
+            <h2>📜 Мои покупки</h2>
+            <div id="purchaseList"></div>
+        </div>
+        
         <div class="products" id="productList"></div>
     </div>
+
     <script>
         const API_URL = 'https://my-shop-server-e0hc.onrender.com';
+
         async function loadProducts() {
-            const res = await fetch(`${API_URL}/api/products`);
-            const products = await res.json();
+            const response = await fetch(`${API_URL}/api/products`);
+            const products = await response.json();
             document.getElementById('status').innerText = products.length > 0 ? '' : 'Товаров пока нет';
             const list = document.getElementById('productList');
             list.innerHTML = '';
@@ -36,12 +53,53 @@
                     <h3>${p.name}</h3>
                     <div class="price">${p.price} монет</div>
                     ${p.image_url ? `<img src="${p.image_url}" style="max-width:100%; height:150px; object-fit:contain;">` : ''}
-                    <button class="btn" onclick="alert('Для покупки напиши в Discord: /buy ${p.name}')">Купить</button>
+                    <button class="btn" onclick="alert('Чтобы купить, напиши в Discord: /buy ${p.name}')">Купить</button>
                 `;
                 list.appendChild(card);
             });
         }
-        loadProducts();
+
+        async function loadProfile() {
+            // Пытаемся получить Discord ID из параметров ссылки или из LocalStorage
+            const params = new URLSearchParams(window.location.search);
+            let discordId = params.get('discord_id');
+            
+            if (discordId) {
+                localStorage.setItem('discord_id', discordId);
+            } else {
+                discordId = localStorage.getItem('discord_id');
+            }
+
+            if (!discordId) {
+                // Если нет ID, скрываем профиль
+                document.getElementById('profileBox').style.display = 'none';
+                return;
+            }
+
+            // Загружаем покупки
+            const response = await fetch(`${API_URL}/api/user/purchases/${discordId}`);
+            const purchases = await response.json();
+            
+            const box = document.getElementById('profileBox');
+            box.style.display = 'block';
+            
+            const list = document.getElementById('purchaseList');
+            if (purchases.length === 0) {
+                list.innerHTML = '<div style="color:#888;">У вас пока нет покупок. Купите что-нибудь через бота!</div>';
+            } else {
+                list.innerHTML = purchases.map(p => `
+                    <div class="purchase-item">
+                        <span><b>${p.product_name}</b> — ${p.price} монет</span>
+                        <span style="color:#666; font-size: 0.9em;">${new Date(p.purchased_at).toLocaleString()}</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        window.onload = () => {
+            loadProducts();
+            loadProfile();
+        };
     </script>
 </body>
 </html>
