@@ -3,46 +3,189 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Админ-панель</title>
+    <title>🌌 Админ-панель</title>
     <style>
-        body { font-family: Arial, padding: 20px; background: #eee; }
-        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; }
-        input, textarea { width: 100%; padding: 10px; margin: 10px 0; box-sizing: border-box; }
-        button { background: #28a745; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 5px; }
-        button.del { background: #dc3545; }
-        .item { border-bottom: 1px solid #ddd; padding: 10px 0; display: flex; justify-content: space-between; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0a0a1a;
+            color: #e0e0ff;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            min-height: 100vh;
+            padding: 30px;
+            background-image: radial-gradient(circle at 20% 30%, rgba(200, 0, 255, 0.1) 0%, transparent 50%);
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(10, 10, 30, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(200, 0, 255, 0.25);
+            box-shadow: 0 0 50px rgba(200, 0, 255, 0.15);
+            padding: 35px;
+            border-radius: 30px;
+        }
+        h2 {
+            font-size: 32px;
+            text-align: center;
+            background: linear-gradient(135deg, #e040fb, #00e5ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+            text-shadow: 0 0 25px rgba(224, 64, 251, 0.3);
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        input, textarea {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 14px 16px;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+            transition: 0.3s;
+            width: 100%;
+        }
+        input:focus, textarea:focus {
+            border-color: #e040fb;
+            box-shadow: 0 0 20px rgba(224, 64, 251, 0.2);
+        }
+        textarea {
+            grid-column: span 2;
+            resize: vertical;
+            min-height: 80px;
+        }
+        .btn-add {
+            grid-column: span 2;
+            background: linear-gradient(135deg, #e040fb, #7c4dff);
+            border: none;
+            color: #fff;
+            padding: 16px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 0 30px rgba(224, 64, 251, 0.3);
+            transition: 0.3s;
+        }
+        .btn-add:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 50px rgba(224, 64, 251, 0.6);
+        }
+        .tools {
+            display: flex;
+            gap: 15px;
+            margin: 30px 0 20px;
+            flex-wrap: wrap;
+        }
+        .tools input {
+            flex: 1;
+            min-width: 180px;
+        }
+        .tools select {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+        }
+        .item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            padding: 15px 20px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            transition: 0.2s;
+        }
+        .item:hover {
+            border-color: rgba(255,255,255,0.2);
+        }
+        .item span {
+            color: #aaaacc;
+        }
+        .item span b {
+            color: #fff;
+        }
+        .btn-del {
+            background: transparent;
+            border: 1px solid #ff1744;
+            color: #ff1744;
+            padding: 6px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-del:hover {
+            background: #ff1744;
+            color: #0a0a1a;
+            box-shadow: 0 0 20px rgba(255, 23, 68, 0.4);
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>🛠️ Админ-панель</h2>
-        <h3>Добавить товар</h3>
-        <input type="text" id="name" placeholder="Название">
-        <input type="number" id="price" placeholder="Цена (только цифры)">
-        <input type="text" id="image" placeholder="Ссылка на картинку (необязательно)">
-        <textarea id="desc" placeholder="Описание"></textarea>
-        <button onclick="addProduct()">Добавить товар</button>
+        <h2>🛸 АДМИН-ПАНЕЛЬ</h2>
 
-        <h3>Список товаров</h3>
+        <div class="form-grid">
+            <input type="text" id="name" placeholder="Название">
+            <input type="number" id="price" placeholder="Цена (монет)">
+            <input type="text" id="image" placeholder="Ссылка на картинку">
+            <textarea id="desc" placeholder="Описание товара"></textarea>
+            <button class="btn-add" onclick="addProduct()">Добавить товар</button>
+        </div>
+
+        <div class="tools">
+            <input type="text" id="search" placeholder="🔍 Поиск по названию..." oninput="renderList()">
+            <select id="sort" onchange="renderList()">
+                <option value="default">По умолчанию</option>
+                <option value="asc">Цена: по возрастанию</option>
+                <option value="desc">Цена: по убыванию</option>
+            </select>
+        </div>
+
         <div id="list"></div>
     </div>
 
     <script>
-        // Ссылка на ваш сервер
         const API_URL = 'https://my-shop-server-e0hc.onrender.com';
+        let products = [];
 
         async function load() {
             const res = await fetch(`${API_URL}/api/products`);
-            const items = await res.json();
+            products = await res.json();
+            renderList();
+        }
+        load();
+
+        function renderList() {
+            const search = document.getElementById('search').value.toLowerCase();
+            const sort = document.getElementById('sort').value;
+            
+            let filtered = products.filter(p => p.name.toLowerCase().includes(search));
+            
+            if (sort === 'asc') filtered.sort((a,b) => a.price - b.price);
+            if (sort === 'desc') filtered.sort((a,b) => b.price - a.price);
+
             const div = document.getElementById('list');
-            div.innerHTML = items.map(p => `
+            div.innerHTML = filtered.map(p => `
                 <div class="item">
-                    <span><b>${p.name}</b> - ${p.price}₽</span>
-                    <button class="del" onclick="delProduct(${p.id})">Удалить</button>
+                    <span><b>${p.name}</b> — ${p.price} монет</span>
+                    <button class="btn-del" onclick="delProduct(${p.id})">Удалить</button>
                 </div>
             `).join('');
         }
-        load();
 
         async function addProduct() {
             const name = document.getElementById('name').value;
@@ -59,6 +202,8 @@
             load();
             document.getElementById('name').value = '';
             document.getElementById('price').value = '';
+            document.getElementById('image').value = '';
+            document.getElementById('desc').value = '';
         }
 
         async function delProduct(id) {
