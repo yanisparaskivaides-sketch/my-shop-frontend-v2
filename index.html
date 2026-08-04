@@ -8,6 +8,8 @@
         body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f4f4f4; }
         .container { max-width: 1200px; margin: 0 auto; }
         h1 { text-align: center; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: white; padding: 15px 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .balance { font-size: 20px; font-weight: bold; color: #28a745; }
         .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
         .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }
         .card img { max-width: 100%; height: 150px; object-fit: contain; }
@@ -19,14 +21,21 @@
 </head>
 <body>
     <div class="container">
-        <h1>🛍️ Наш магазин</h1>
+        <div class="header">
+            <h1>🛍️ Наш магазин</h1>
+            <div class="balance" id="balanceDisplay">💰 Баланс: Загрузка...</div>
+        </div>
+        
         <div id="status">Загрузка товаров...</div>
         <div class="products" id="productList"></div>
     </div>
 
     <script>
-        // Ссылка на ваш сервер (она правильная!)
+        // Ссылка на твой сервер (она правильная!)
         const API_URL = 'https://my-shop-server-e0hc.onrender.com';
+
+        // ВАЖНО: ВСТАВЬ СЮДА СВОЙ EMAIL (тот, под которым ты заходишь в админку)
+        const USER_EMAIL = 'test@mail.com';
 
         async function loadProducts() {
             try {
@@ -54,7 +63,22 @@
                 document.getElementById('status').innerText = 'Ошибка загрузки: ' + error.message;
             }
         }
+
+        // Функция для показа баланса
+        async function showBalance() {
+            try {
+                const response = await fetch(`${API_URL}/api/user/balance/${USER_EMAIL}`);
+                const data = await response.json();
+                document.getElementById('balanceDisplay').innerText = `💰 Баланс: ${data.balance} монет`;
+            } catch (error) {
+                document.getElementById('balanceDisplay').innerText = '💰 Баланс: Не удалось загрузить';
+                console.log('Ошибка баланса:', error);
+            }
+        }
+
+        // Запускаем всё при загрузке
         loadProducts();
+        showBalance();
     </script>
 </body>
 </html>
