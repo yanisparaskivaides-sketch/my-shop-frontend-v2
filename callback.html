@@ -1,22 +1,42 @@
-<script>
-    (async function() {
-        const params = new URLSearchParams(window.location.search);
-        const code = params.get('code');
-        if (!code) {
-            document.write('Ошибка: Код авторизации не найден');
-            return;
-        }
-        try {
-            const response = await fetch('https://my-shop-server-e0hc.onrender.com/api/auth/discord/callback?code=' + code);
-            const data = await response.json();
-            if (data.token) {
-                localStorage.setItem('token', data.token);
-                window.location.href = '/';
-            } else {
-                document.write('Ошибка авторизации: ' + data.error);
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Авторизация...</title>
+    <style>
+        body { background: #0a0a1a; color: #00e5ff; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif; }
+    </style>
+</head>
+<body>
+    <h2>🔄 Загрузка вашего профиля...</h2>
+
+    <script>
+        (async function() {
+            const params = new URLSearchParams(window.location.search);
+            const code = params.get('code');
+
+            if (!code) {
+                document.body.innerHTML = '<h2 style="color:red;">❌ Ошибка: Код авторизации не найден</h2>';
+                return;
             }
-        } catch (error) {
-            document.write('Ошибка подключения к серверу');
-        }
-    })();
-</script>
+
+            try {
+                const API_URL = 'https://my-shop-server-e0hc.onrender.com';
+                const response = await fetch(`${API_URL}/api/auth/discord/callback?code=${code}`);
+                const data = await response.json();
+
+                if (data.token) {
+                    // Сохраняем токен в браузере
+                    localStorage.setItem('token', data.token);
+                    // Перекидываем на главную страницу (где уже будет профиль)
+                    window.location.href = '/';
+                } else {
+                    document.body.innerHTML = `<h2 style="color:red;">❌ Ошибка: ${data.error || 'Неизвестная ошибка'}</h2>`;
+                }
+            } catch (error) {
+                document.body.innerHTML = '<h2 style="color:red;">❌ Ошибка подключения к серверу</h2>';
+            }
+        })();
+    </script>
+</body>
+</html>
