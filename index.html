@@ -9,18 +9,18 @@
         body {
             background: #0a0a1a;
             color: #e0e0ff;
-            font-family: 'Segoe UI', 'Arial', sans-serif;
+            font-family: 'Segoe UI', Arial, sans-serif;
             min-height: 100vh;
             padding: 20px;
             background-image: radial-gradient(circle at 10% 20%, rgba(100, 0, 255, 0.15) 0%, transparent 50%),
                               radial-gradient(circle at 90% 80%, rgba(0, 200, 255, 0.1) 0%, transparent 40%);
         }
-        .container { max-width: 1300px; margin: 0 auto; }
+        .container { max-width: 1200px; margin: 0 auto; }
         .header {
             display: flex; justify-content: space-between; align-items: center;
-            background: rgba(10, 10, 30, 0.7); backdrop-filter: blur(12px);
-            border: 1px solid rgba(120, 0, 255, 0.3);
-            box-shadow: 0 0 30px rgba(100, 0, 255, 0.2);
+            background: rgba(10, 10, 30, 0.8); backdrop-filter: blur(12px);
+            border: 1px solid rgba(120, 0, 255, 0.4);
+            box-shadow: 0 0 30px rgba(100, 0, 255, 0.3);
             padding: 15px 30px; border-radius: 20px; margin-bottom: 30px;
         }
         .header-left { display: flex; align-items: center; gap: 20px; }
@@ -31,21 +31,22 @@
             -webkit-text-fill-color: transparent;
             text-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
         }
-        .avatar { width: 45px; height: 45px; border-radius: 50%; border: 2px solid #b388ff; box-shadow: 0 0 15px rgba(179, 136, 255, 0.5); }
+        .avatar { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #b388ff; box-shadow: 0 0 15px rgba(179, 136, 255, 0.5); }
+        .profile-info { display: flex; align-items: center; gap: 15px; }
+        .username { font-size: 20px; font-weight: bold; color: #fff; }
+        .user-balance { font-weight: bold; font-size: 22px; color: #00e5ff; text-shadow: 0 0 15px rgba(0, 229, 255, 0.5); }
         .login-btn {
             background: linear-gradient(135deg, #b388ff, #7c4dff);
             color: #fff; text-decoration: none; padding: 12px 28px; border-radius: 30px;
-            font-weight: bold; transition: all 0.3s;
+            font-weight: bold; transition: all 0.3s; cursor: pointer;
             box-shadow: 0 0 20px rgba(124, 77, 255, 0.4); border: 1px solid rgba(255,255,255,0.1);
         }
         .login-btn:hover { transform: scale(1.05); box-shadow: 0 0 35px rgba(124, 77, 255, 0.7); }
-        .balance { font-weight: bold; font-size: 20px; color: #00e5ff; text-shadow: 0 0 15px rgba(0, 229, 255, 0.5); }
-        #status { text-align: center; font-size: 18px; color: #8888aa; margin-bottom: 25px; }
         .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; }
         .card {
-            background: rgba(15, 15, 35, 0.7); backdrop-filter: blur(8px);
-            border: 1px solid rgba(150, 0, 255, 0.25);
-            box-shadow: 0 0 20px rgba(100, 0, 255, 0.15), inset 0 0 40px rgba(255,255,255,0.02);
+            background: rgba(15, 15, 35, 0.8); backdrop-filter: blur(8px);
+            border: 1px solid rgba(150, 0, 255, 0.3);
+            box-shadow: 0 0 20px rgba(100, 0, 255, 0.2);
             padding: 25px 20px; border-radius: 20px; text-align: center; transition: all 0.3s ease;
         }
         .card:hover { transform: translateY(-8px) scale(1.02); border-color: #b388ff; box-shadow: 0 0 40px rgba(179, 136, 255, 0.4); }
@@ -60,24 +61,42 @@
             box-shadow: 0 0 10px rgba(179, 136, 255, 0.2);
         }
         .btn:hover { background: #b388ff; color: #0a0a1a; box-shadow: 0 0 30px rgba(179, 136, 255, 0.6); }
-        #userInfo { display: flex; align-items: center; gap: 12px; }
-        #userInfo strong { color: #fff; }
+        #status { text-align: center; font-size: 18px; color: #8888aa; margin-bottom: 25px; }
+        .cabinet-panel { margin-top: 30px; background: rgba(10, 10, 30, 0.5); padding: 20px; border-radius: 15px; border: 1px solid rgba(179, 136, 255, 0.2); }
+        .cabinet-panel h2 { color: #b388ff; margin-bottom: 15px; }
+        .order-item { background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 10px; margin-bottom: 10px; border-left: 3px solid #00e5ff; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
+        <!-- Шапка -->
+        <div class="header" id="headerBlock">
             <div class="header-left">
                 <h1>🌌 ГАЛАКТИКА</h1>
-                <div id="userInfo"></div>
+                <div id="userInfo" style="display: none;" class="profile-info">
+                    <span id="userAvatar"></span>
+                    <div>
+                        <div class="username" id="userName">Загрузка...</div>
+                        <div class="user-balance" id="userBalance">💰 Баланс: 0</div>
+                    </div>
+                </div>
             </div>
             <div id="loginBlock">
-                <a href="#" class="login-btn" id="loginBtn">🔮 Войти через Discord</a>
+                <button class="login-btn" id="loginBtn">🔮 Войти через Discord</button>
             </div>
         </div>
 
+        <!-- Товары -->
         <div id="status">Загрузка товаров...</div>
         <div class="products" id="productList"></div>
+
+        <!-- История покупок (Заглушка) -->
+        <div id="historyBlock" class="cabinet-panel" style="display: none;">
+            <h2>📜 История покупок</h2>
+            <div id="orderHistory">
+                <div class="order-item">🛒 Здесь будет отображаться история ваших покупок.</div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -86,55 +105,62 @@
 
         let currentUser = null;
 
+        // --- ЗАГРУЗКА ТОВАРОВ ---
         async function loadProducts() {
-            const response = await fetch(`${API_URL}/api/products`);
-            const products = await response.json();
-            document.getElementById('status').innerText = products.length > 0 ? '' : 'Товаров пока нет';
-            const list = document.getElementById('productList');
-            list.innerHTML = '';
-            products.forEach(p => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    <h3>${p.name}</h3>
-                    <div class="price">${p.price} монет</div>
-                    ${p.image_url ? `<img src="${p.image_url}">` : ''}
-                    <p>${p.description || ''}</p>
-                    <button class="btn" onclick="buyProduct(${p.id}, '${p.name}', ${p.price})">Купить</button>
-                `;
-                list.appendChild(card);
-            });
+            try {
+                const response = await fetch(`${API_URL}/api/products`);
+                const products = await response.json();
+                document.getElementById('status').innerText = products.length > 0 ? '' : 'Товаров пока нет';
+                const list = document.getElementById('productList');
+                list.innerHTML = '';
+                products.forEach(p => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <h3>${p.name}</h3>
+                        <div class="price">${p.price} монет</div>
+                        ${p.image_url ? `<img src="${p.image_url}">` : ''}
+                        <p>${p.description || ''}</p>
+                        <button class="btn" onclick="buyProduct(${p.id}, '${p.name}', ${p.price})">Купить</button>
+                    `;
+                    list.appendChild(card);
+                });
+            } catch (error) {
+                document.getElementById('status').innerText = 'Ошибка загрузки товаров';
+            }
         }
 
+        // --- ПОКУПКА ---
         async function buyProduct(id, name, price) {
             if (!currentUser) return alert('Сначала войдите через Discord!');
             if (currentUser.balance < price) return alert(`Не хватает монет! У вас ${currentUser.balance}, нужно ${price}.`);
             if (confirm(`Купить "${name}" за ${price} монет?`)) {
-                alert('✅ Покупка совершена!');
+                // Здесь будет реальное списание
+                alert('✅ Покупка совершена! (В разработке)');
                 location.reload();
             }
         }
 
-        async function checkUser() {
+        // --- АВТОРИЗАЦИЯ (ФИКС КОТОРЫЙ РАБОТАЕТ) ---
+        async function handleAuth() {
             const urlParams = new URLSearchParams(window.location.search);
-            
-            // ЕСЛИ МЫ НА СТРАНИЦЕ /auth/discord/callback С КОДОМ
-            if (window.location.pathname.includes('/auth/discord/callback') && urlParams.get('code')) {
-                const code = urlParams.get('code');
-                // Прямо сейчас отправляем код на сервер
+            const code = urlParams.get('code');
+
+            // Если есть код в адресной строке - отправляем его на сервер
+            if (code) {
                 const response = await fetch(`${API_URL}/api/auth/discord/callback?code=${code}`);
                 const data = await response.json();
                 
                 if (data.token) {
                     localStorage.setItem('token', data.token);
-                    window.location.href = FRONTEND_URL; // Возвращаемся на главную
+                    window.location.href = FRONTEND_URL; // Перезагружаем страницу без кода
                     return;
                 } else {
-                    alert('Ошибка авторизации: ' + data.error);
+                    alert('Ошибка авторизации: ' + (data.error || 'Неизвестная ошибка'));
                 }
             }
 
-            // ОБЫЧНАЯ ПРОВЕРКА ПОЛЬЗОВАТЕЛЯ
+            // Если токен уже сохранён - загружаем пользователя
             const token = localStorage.getItem('token');
             if (token) {
                 try {
@@ -143,38 +169,44 @@
                     });
                     if (response.ok) {
                         currentUser = await response.json();
-                        renderUser(currentUser);
+                        showUserCabinet(currentUser);
                         return;
                     }
                 } catch (e) {}
                 localStorage.removeItem('token');
             }
+
+            // Если не авторизован - показываем кнопку входа
             showLoginButton();
         }
 
-        function renderUser(user) {
-            const loginBlock = document.getElementById('loginBlock');
-            const userInfo = document.getElementById('userInfo');
-            loginBlock.innerHTML = `<div class="balance">💰 Баланс: ${user.balance} монет</div>`;
-            userInfo.innerHTML = `
-                ${user.avatar_url ? `<img src="${user.avatar_url}" class="avatar">` : ''}
-                <strong>${user.name}</strong>
-            `;
+        // --- ПОКАЗАТЬ КАБИНЕТ ПОЛЬЗОВАТЕЛЯ ---
+        function showUserCabinet(user) {
+            // Прячем кнопку входа, показываем профиль
+            document.getElementById('loginBlock').style.display = 'none';
             document.getElementById('userInfo').style.display = 'flex';
+            document.getElementById('userName').innerText = user.name;
+            document.getElementById('userBalance').innerText = `💰 Баланс: ${user.balance} монет`;
+            if (user.avatar_url) {
+                document.getElementById('userAvatar').innerHTML = `<img src="${user.avatar_url}" class="avatar">`;
+            }
+            // Показываем историю
+            document.getElementById('historyBlock').style.display = 'block';
         }
 
+        // --- ПОКАЗАТЬ КНОПКУ ВХОДА ---
         async function showLoginButton() {
             const loginBtn = document.getElementById('loginBtn');
             const DISCORD_CLIENT_ID = '1529148109702041610';
-            // Отправляем на /auth/discord/callback (Discord сам сюда вернёт)
             const redirectUri = `${FRONTEND_URL}/auth/discord/callback`;
             const discordUrl = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=identify`;
-            loginBtn.href = discordUrl;
+            loginBtn.onclick = () => { window.location.href = discordUrl; };
         }
 
+        // --- ЗАПУСК ---
         window.onload = () => {
             loadProducts();
-            checkUser();
+            handleAuth();
         };
     </script>
 </body>
