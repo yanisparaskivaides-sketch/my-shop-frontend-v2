@@ -17,18 +17,17 @@
         }
         .header-left { display: flex; align-items: center; gap: 20px; }
         .header-left h1 {
-            font-size: 28px;
-            background: linear-gradient(135deg, #b388ff, #00e5ff);
+            font-size: 28px; background: linear-gradient(135deg, #b388ff, #00e5ff);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
         .avatar { width: 45px; height: 45px; border-radius: 50%; border: 2px solid #b388ff; }
         .profile-info { display: flex; align-items: center; gap: 15px; }
         .user-name { color: #fff; font-size: 18px; font-weight: bold; }
-        .user-balance { color: #00e5ff; font-size: 20px; font-weight: bold; text-shadow: 0 0 15px rgba(0, 229, 255, 0.5); }
+        .user-balance { color: #00e5ff; font-size: 20px; font-weight: bold; }
         .login-btn {
             background: linear-gradient(135deg, #b388ff, #7c4dff); color: #fff; border: none;
             padding: 12px 28px; border-radius: 30px; font-weight: bold; cursor: pointer;
-            box-shadow: 0 0 20px rgba(124, 77, 255, 0.4);
+            box-shadow: 0 0 20px rgba(124, 77, 255, 0.4); text-decoration: none; display: inline-block;
         }
         .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; }
         .card {
@@ -59,7 +58,7 @@
                 </div>
             </div>
             <div id="loginBlock">
-                <button class="login-btn" id="loginBtn">🔮 Войти через Discord</button>
+                <a href="#" class="login-btn" id="loginBtn">🔮 Войти через Discord</a>
             </div>
         </div>
 
@@ -95,32 +94,13 @@
         async function buyProduct(id, price) {
             if (!currentUser) return alert('Сначала войдите через Discord!');
             if (currentUser.balance < price) return alert(`Не хватает монет! У вас ${currentUser.balance}, нужно ${price}.`);
-            alert('✅ Покупка совершена!');
+            alert('✅ Покупка совершена! (Тест)');
         }
 
-        // УНИВЕРСАЛЬНАЯ ФУНКЦИЯ АВТОРИЗАЦИИ
         async function handleAuth() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const code = urlParams.get('code');
-
-            // Если Discord вернул нас на главную с параметром code
-            if (code) {
-                const response = await fetch(`${API_URL}/api/auth/discord/callback?code=${code}`);
-                const data = await response.json();
-                
-                if (data.token) {
-                    localStorage.setItem('token', data.token);
-                    // Очищаем ссылку от параметров и перезагружаемся
-                    window.history.replaceState({}, document.title, FRONTEND_URL);
-                    window.location.reload();
-                    return;
-                } else {
-                    alert('Ошибка авторизации: ' + (data.error || 'Неизвестная ошибка'));
-                }
-            }
-
-            // Проверяем токен в LocalStorage
+            // Сначала проверяем, есть ли токен в LocalStorage
             const token = localStorage.getItem('token');
+
             if (token) {
                 try {
                     const response = await fetch(`${API_URL}/api/user/me`, {
@@ -134,7 +114,6 @@
                 } catch (e) {}
                 localStorage.removeItem('token');
             }
-
             showLoginButton();
         }
 
@@ -151,9 +130,10 @@
         async function showLoginButton() {
             const loginBtn = document.getElementById('loginBtn');
             const DISCORD_CLIENT_ID = '1529148109702041610';
-            // ВАЖНО: Отправляем Discord прямо на главную страницу, без сложных путей
-            const discordUrl = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(FRONTEND_URL)}&response_type=code&scope=identify`;
-            loginBtn.onclick = () => { window.location.href = discordUrl; };
+            // ВАЖНО: Отправляем Discord НА ФАЙЛ callback.html!
+            const redirectUri = `${FRONTEND_URL}/callback.html`;
+            const discordUrl = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=identify`;
+            loginBtn.href = discordUrl;
         }
 
         window.onload = () => {
