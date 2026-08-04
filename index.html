@@ -84,8 +84,6 @@
         const API_URL = 'https://my-shop-server-e0hc.onrender.com';
         const FRONTEND_URL = 'https://my-shop-frontend-v2.onrender.com';
 
-        const urlParams = new URLSearchParams(window.location.search);
-        let token = urlParams.get('token');
         let currentUser = null;
 
         async function loadProducts() {
@@ -118,12 +116,7 @@
         }
 
         async function checkUser() {
-            if (token) {
-                localStorage.setItem('token', token);
-                window.history.replaceState({}, document.title, FRONTEND_URL);
-            } else {
-                token = localStorage.getItem('token');
-            }
+            const token = localStorage.getItem('token');
 
             if (token) {
                 try {
@@ -160,9 +153,23 @@
             loginBtn.href = discordUrl;
         }
 
+        // === ЭТОТ КОД ПЕРЕХВАТЫВАЕТ АВТОРИЗАЦИЮ ===
         window.onload = () => {
-            loadProducts();
-            checkUser();
+            // Проверяем, вернулись ли мы от Discord
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            const error = urlParams.get('error');
+
+            if (code) {
+                // Если есть код, перенаправляем на сервер для обработки
+                window.location.href = `https://my-shop-server-e0hc.onrender.com/api/auth/discord/callback?code=${code}`;
+            } else if (error) {
+                alert('❌ Ошибка авторизации в Discord');
+            } else {
+                // Если мы на главной странице, загружаем магазин
+                loadProducts();
+                checkUser();
+            }
         };
     </script>
 </body>
