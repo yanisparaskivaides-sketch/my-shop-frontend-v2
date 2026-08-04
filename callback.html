@@ -1,0 +1,22 @@
+<script>
+    (async function() {
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get('code');
+        if (!code) {
+            document.write('Ошибка: Код авторизации не найден');
+            return;
+        }
+        try {
+            const response = await fetch('https://my-shop-server-e0hc.onrender.com/api/auth/discord/callback?code=' + code);
+            const data = await response.json();
+            if (data.token) {
+                localStorage.setItem('token', data.token);
+                window.location.href = '/';
+            } else {
+                document.write('Ошибка авторизации: ' + data.error);
+            }
+        } catch (error) {
+            document.write('Ошибка подключения к серверу');
+        }
+    })();
+</script>
